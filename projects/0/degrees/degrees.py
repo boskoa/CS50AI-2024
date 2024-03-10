@@ -92,8 +92,40 @@ def shortest_path(source, target):
     If no possible path, returns None.
     """
 
-    # TODO
-    raise NotImplementedError
+    found = False
+    path = []
+    frontiers = [([], None, source)]
+    checked = [source]
+
+    if source == target:
+        return path
+    
+    def check_neighbors(person):
+        neighbors = neighbors_for_person(person[2])
+        for neighbor in neighbors:
+            if neighbor[1] in checked:
+                continue
+            elif target == neighbor[1]:
+                nonlocal path
+                path = person[0][:]
+                path.append(neighbor)
+                return True
+            else:
+                checked.append(neighbor[1])
+                current_path = person[0][:]
+                current_path.append(neighbor)
+                neighbor_to_frontier = (current_path, neighbor[0], neighbor[1])
+                frontiers.append(neighbor_to_frontier)
+        
+        return False
+
+    while len(frontiers) != 0 and not found:
+        found = check_neighbors(frontiers[0])
+        if found:
+            return path
+        frontiers.pop(0)
+
+    return None
 
 
 def person_id_for_name(name):
