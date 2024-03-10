@@ -2,3 +2,4 @@
 commands
 proba.py
 **/*.csv
+**/__pycache__
