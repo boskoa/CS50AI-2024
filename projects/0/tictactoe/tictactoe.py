@@ -38,7 +38,7 @@ def actions(board):
     for row in range(len(board)):
         for column in range(len(board[row])):
             if board[row][column] == EMPTY:
-                possible_actions.add((column, row))
+                possible_actions.add((row, column))
 
     return possible_actions
 
@@ -48,12 +48,12 @@ def result(board, action):
     Returns the board that results from making move (i, j) on the board.
     """
     board_copy = copy.deepcopy(board)
-    print("BAR", action)
+    print("EMPTY", board, action)
+    if not action:
+        raise ValueError
     if board[action[0]][action[1]] == EMPTY:
         board_copy[action[0]][action[1]] = player(board)
         return board_copy
-    else:
-        raise ValueError
 
 
 def winner(board):
@@ -62,21 +62,21 @@ def winner(board):
     """
     def won(p):
         win = False
-        if board[0][0] == p and board[0][1] and board[0][2]:
+        if board[0][0] == p and board[0][1] == p and board[0][2] == p:
             win = True
-        elif board[1][0] == p and board[1][1] and board[1][2]:
+        elif board[1][0] == p and board[1][1] == p and board[1][2] == p:
             win = True
-        elif board[2][0] == p and board[2][1] and board[2][2]:
+        elif board[2][0] == p and board[2][1] == p and board[2][2] == p:
             win = True
-        elif board[0][0] == p and board[1][0] and board[2][0]:
+        elif board[0][0] == p and board[1][0] == p and board[2][0] == p:
             win = True
-        elif board[0][1] == p and board[1][1] and board[2][1]:
+        elif board[0][1] == p and board[1][1] == p and board[2][1] == p:
             win = True
-        elif board[0][2] == p and board[1][2] and board[2][2]:
+        elif board[0][2] == p and board[1][2] == p and board[2][2] == p:
             win = True
-        elif board[0][0] == p and board[1][1] and board[2][2]:
+        elif board[0][0] == p and board[1][1] == p and board[2][2] == p:
             win = True
-        elif board[0][2] == p and board[1][1] and board[2][0]:
+        elif board[0][2] == p and board[1][1] == p and board[2][0] == p:
             win = True
 
         return win
@@ -124,7 +124,6 @@ def minimax(board):
     def max_value(current_board):
         if terminal(current_board):
             return utility(current_board)
-        print("MAX", actions(current_board))
         v = -math.inf
         for action in actions(current_board):
             v = max(v, min_value(result(current_board, action)))
@@ -133,7 +132,6 @@ def minimax(board):
     def min_value(current_board):
         if terminal(current_board):
             return utility(current_board)
-        print("MIN", actions(current_board))
         v = math.inf
         for action in actions(current_board):
             v = min(v, max_value(result(current_board, action)))
