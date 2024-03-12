@@ -24,6 +24,7 @@ def player(board):
     Returns player who has the next turn on a board.
     """
     flatten_board = sum(board, [])
+
     if flatten_board.count(X) > flatten_board.count(O):
         return O
     else:
@@ -35,6 +36,7 @@ def actions(board):
     Returns set of all possible actions (i, j) available on the board.
     """
     possible_actions = set()
+
     for row in range(len(board)):
         for column in range(len(board[row])):
             if board[row][column] == EMPTY:
@@ -48,7 +50,7 @@ def result(board, action):
     Returns the board that results from making move (i, j) on the board.
     """
     board_copy = copy.deepcopy(board)
-    print("EMPTY", board, action)
+
     if not action:
         raise ValueError
     if board[action[0]][action[1]] == EMPTY:
@@ -94,6 +96,7 @@ def terminal(board):
     Returns True if game is over, False otherwise.
     """
     flatten_board = sum(board, [])
+
     if winner(board) or flatten_board.count(EMPTY) == 0:
         return True
     else:
@@ -122,22 +125,39 @@ def minimax(board):
     current_player = player(board)
 
     def max_value(current_board):
-        if terminal(current_board):
-            return utility(current_board)
         v = -math.inf
+        move = ()
+
+        if terminal(current_board):
+            return [utility(current_board), move]
+
         for action in actions(current_board):
-            v = max(v, min_value(result(current_board, action)))
-        return v
+            alpha = v
+            minV = min_value(result(current_board, action))[0]
+
+            if minV > v:
+                v = minV
+                move = action
+        return [v, move]
 
     def min_value(current_board):
-        if terminal(current_board):
-            return utility(current_board)
         v = math.inf
+        move = ()
+
+        if terminal(current_board):
+            return [utility(current_board), move]
+
         for action in actions(current_board):
-            v = min(v, max_value(result(current_board, action)))
-        return v
+            beta = v
+            maxV = max_value(result(current_board, action))[0]
+
+            if maxV < v:
+                v = maxV
+                move = action
+
+        return [v, move]
 
     if current_player == X:
-        max_value(board)
-    else:
-        min_value(board)
+        return max_value(board)[1]
+    elif current_player == O:
+        return min_value(board)[1]
