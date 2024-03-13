@@ -50,9 +50,11 @@ def result(board, action):
     Returns the board that results from making move (i, j) on the board.
     """
     board_copy = copy.deepcopy(board)
+    allowed = actions(board)
 
-    if not action:
+    if not action or (action not in allowed):
         raise ValueError
+
     if board[action[0]][action[1]] == EMPTY:
         board_copy[action[0]][action[1]] = player(board)
         return board_copy
@@ -124,7 +126,7 @@ def minimax(board):
 
     current_player = player(board)
 
-    def max_value(current_board):
+    def max_value(current_board, alpha, beta):
         v = -math.inf
         move = ()
 
@@ -132,15 +134,20 @@ def minimax(board):
             return [utility(current_board), move]
 
         for action in actions(current_board):
-            alpha = v
-            minV = min_value(result(current_board, action))[0]
+            minV = min_value(result(current_board, action), alpha, beta)[0]
 
             if minV > v:
                 v = minV
                 move = action
+
+            if v >= beta:
+                break
+            else:
+                alpha = minV
+
         return [v, move]
 
-    def min_value(current_board):
+    def min_value(current_board, alpha, beta):
         v = math.inf
         move = ()
 
@@ -148,16 +155,20 @@ def minimax(board):
             return [utility(current_board), move]
 
         for action in actions(current_board):
-            beta = v
-            maxV = max_value(result(current_board, action))[0]
+            maxV = max_value(result(current_board, action), alpha, beta)[0]
 
             if maxV < v:
                 v = maxV
                 move = action
 
+            if v <= alpha:
+                break
+            else:
+                beta = maxV
+
         return [v, move]
 
     if current_player == X:
-        return max_value(board)[1]
+        return max_value(board, -math.inf, math.inf)[1]
     elif current_player == O:
-        return min_value(board)[1]
+        return min_value(board, -math.inf, math.inf)[1]
