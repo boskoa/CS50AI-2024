@@ -131,19 +131,19 @@ def minimax(board):
         move = ()
 
         if terminal(current_board):
-            return [utility(current_board), move]
+            alpha = utility(current_board)
+            return [alpha, move]
 
         for action in actions(current_board):
             minV = min_value(result(current_board, action), alpha, beta)[0]
 
             if minV > v:
                 v = minV
+                alpha = max(alpha, v)
                 move = action
 
-            if v >= beta:
+            if beta <= alpha:
                 break
-            else:
-                alpha = minV
 
         return [v, move]
 
@@ -152,19 +152,19 @@ def minimax(board):
         move = ()
 
         if terminal(current_board):
-            return [utility(current_board), move]
+            beta = utility(current_board)
+            return [beta, move]
 
         for action in actions(current_board):
             maxV = max_value(result(current_board, action), alpha, beta)[0]
 
             if maxV < v:
                 v = maxV
+                beta = min(beta, v)
                 move = action
 
-            if v <= alpha:
+            if alpha >= beta:
                 break
-            else:
-                beta = maxV
 
         return [v, move]
 
