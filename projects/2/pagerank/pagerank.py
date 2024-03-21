@@ -37,7 +37,6 @@ def crawl(directory):
             contents = f.read()
             links = re.findall(r"<a\s+(?:[^>]*?)href=\"([^\"]*)\"", contents)
             pages[filename] = set(links) - {filename}
-    print("FOO", pages)
 
     # Only include links to other pages in the corpus
     for filename in pages:
@@ -45,7 +44,6 @@ def crawl(directory):
             link for link in pages[filename]
             if link in pages
         )
-    print("BAR", pages)
 
     return pages
 
@@ -64,20 +62,15 @@ def transition_model(corpus, page, damping_factor):
     if not corpus[page]:
         for corpus_page in corpus:
             page_probabilities[corpus_page] = 1 / len(corpus)
+
     else:
+        for p in corpus:
+            page_probabilities[p] = (1 - damping_factor) / len(corpus)
+
         for link in corpus[page]:
-            page_probabilities[link] = damping_factor / len(corpus[page]) + (
+            page_probabilities[link] += damping_factor / len(corpus[page]) + (
                 1 - damping_factor
             ) / (len(corpus[page]) + 1)
-        random_page = random.choice([x for x in corpus if x != page])
-        if random_page in page_probabilities.keys():
-            page_probabilities[random_page] += (1 - damping_factor) / (
-                len(corpus[page]) + 1
-            )
-        else:
-            page_probabilities[random_page] = (1 - damping_factor) / (
-                len(corpus[page]) + 1
-            )
 
     return page_probabilities
 
@@ -101,7 +94,7 @@ def sample_pagerank(corpus, damping_factor, n):
         ranks[page] += 1
         page = list(
             random.choices(
-                list(sample.keys()), cum_weights=list(sample.values()), k=1
+                list(sample.keys()), weights=list(sample.values()), k=1
             )
         )[0]
         sample = transition_model(corpus, page, damping_factor)
@@ -122,31 +115,25 @@ def iterate_pagerank(corpus, damping_factor):
     PageRank values should sum to 1.
     """
     pages = corpus.keys()
-    ranks = dict.fromkeys(pages, 1 / len(corpus))
-    ranks_copy = dict.fromkeys(ranks, 1)
-    links_to_page = dict()
+    N = len(corpus)
+    ranks = dict.fromkeys(pages, 1 / N)
     condition = True
 
-    for page in corpus.items():
-        for link in page[1]:
-            if link not in links_to_page.keys():
-                links_to_page[link] = set()
-                links_to_page[link].add(page[0])
-            else:
-                links_to_page[link].add(page[0])
-    print("LINKS", links_to_page)
     while condition:
         condition = False
-        ranks_copy = ranks.copy()
-        for page in links_to_page.items():
-            ranks[page[0]] = (1 - damping_factor) / len(pages)
-            for i in page[1]:
-                ranks[page[0]] += ranks_copy[i] / len(corpus[i])
+        previous_ranks = ranks.copy()
         for page in pages:
-            if ranks_copy[page] - ranks[page] > 0.001:
+            first_condition = (1 - damping_factor) / N
+            second_condition = 0
+            for p, links in corpus.items():
+                if page in links:
+                    second_condition += previous_ranks[p] / len(links)
+                elif len(links) == 0:
+                    second_condition += previous_ranks[p] / N
+            ranks[page] = first_condition + damping_factor * second_condition
+            if abs(ranks[page] - previous_ranks[page]) > 0.001:
                 condition = True
 
-    print("START", ranks)
     return ranks
 
 
