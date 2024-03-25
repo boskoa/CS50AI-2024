@@ -140,7 +140,7 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         * everyone not in set` have_trait` does not have the trait.
     """
     probability = 1
-    print("START", people, "ONE", one_gene, "TWO", two_genes, have_trait)
+
     for person, data in people.items():
         genes = 1 if person in one_gene else 2 if person in two_genes else 0
         trait = True if person in have_trait else False
@@ -155,7 +155,7 @@ def joint_probability(people, one_gene, two_genes, have_trait):
                 inheritance[parent] = (
                     1 - PROBS["mutation"]
                 ) if parent in two_genes else (
-                    0.5 - PROBS["mutation"]
+                    0.5
                 ) if parent in one_gene else PROBS["mutation"]
 
             probability *= (
@@ -166,9 +166,8 @@ def joint_probability(people, one_gene, two_genes, have_trait):
             ) if person in one_gene else (
                 (1 - inheritance[mother]) * (1 - inheritance[father])
             )
-            print("PARENT", inheritance, probability)
-        print("PERSON", probability * PROBS["trait"][genes][trait])
         probability *= PROBS["trait"][genes][trait]
+
     return probability
 
 
@@ -187,7 +186,6 @@ def update(probabilities, one_gene, two_genes, have_trait, p):
 
         probabilities[person]["gene"][genes] += p
         probabilities[person]["trait"][trait] += p
-        print("UPDATE", p, genes, probabilities[person])
 
 
 def normalize(probabilities):
@@ -195,18 +193,15 @@ def normalize(probabilities):
     Update `probabilities` such that each probability distribution
     is normalized (i.e., sums to 1, with relative proportions the same).
     """
-    print("ENTRY NORMALIZE", probabilities)
     for probability in probabilities.values():
         gene_values = probability["gene"]
         gene_sum = sum(gene_values.values())
         trait_values = probability["trait"]
         trait_sum = sum(trait_values.values())
         for i in gene_values:
-            print("GEEENEEEEE", gene_sum, gene_values[i] / gene_sum)
             gene_values[i] = gene_values[i] / gene_sum
         for i in trait_values:
             trait_values[i] = trait_values[i] / trait_sum
-    print("NORMALIZE", probabilities)
 
 
 if __name__ == "__main__":
