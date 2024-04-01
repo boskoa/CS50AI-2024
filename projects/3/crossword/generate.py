@@ -135,7 +135,7 @@ class CrosswordCreator():
             if not pair:
                 words_x.remove(word_x)
                 revised = True
-        #print("WORDS_X", words_x)
+
         return revised
 
     def ac3(self, arcs=None):
@@ -147,7 +147,6 @@ class CrosswordCreator():
         Return True if arc consistency is enforced and no domains are empty;
         return False if one or more domains end up empty.
         """
-        print("OVER", self.domains)
         # Get arcs from existing overlaps
         if arcs is None:
             arcs = [i for (i, j) in self.crossword.overlaps.items() if j]
@@ -170,7 +169,6 @@ class CrosswordCreator():
         Return True if `assignment` is complete (i.e., assigns a value to each
         crossword variable); return False otherwise.
         """
-        print("ASS", assignment)
         for variable in self.crossword.variables:
             if variable not in assignment:
                 return False
@@ -182,7 +180,6 @@ class CrosswordCreator():
         Return True if `assignment` is consistent (i.e., words fit in crossword
         puzzle without conflicting characters); return False otherwise.
         """
-        print("CONS", assignment)
         for key, value in assignment.items():
             # Check if the value is not repeating
             if list(assignment.values()).count(value) > 1:
@@ -249,7 +246,22 @@ class CrosswordCreator():
 
         If no assignment is possible, return None.
         """
-        return NotImplementedError
+        # Check if assignment is satisfactory
+        if self.assignment_complete(assignment):
+            return assignment
+        # Get unassigneg variable
+        unassigned_variable = self.select_unassigned_variable(assignment)
+        # Assign a value to the variable
+        for value in self.order_domain_values(unassigned_variable, assignment):
+            assignment[unassigned_variable] = value
+            # Run the backtrack again
+            result = self.backtrack(assignment)
+            # Return result if OK, otherwise - remove it
+            if self.consistent(assignment):
+                return result
+            del assignment[unassigned_variable]
+
+        return None
 
 
 def main():
