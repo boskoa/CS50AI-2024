@@ -3,3 +3,5 @@ commands
 proba.py
 **/*.csv
 **/__pycache__/
+**/gtsrb/
+**/gtsrb-small/
