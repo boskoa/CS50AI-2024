@@ -1,4 +1,0 @@
-check50 --local ai50/projects/2024/x/degrees
-
-#start venv
-source .venv/bin/activate
